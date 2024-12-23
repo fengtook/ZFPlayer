@@ -406,8 +406,8 @@
 }
 
 - (void)back:(UITapGestureRecognizer *)gesture {
-    if (self.backBtnClickCallback) {
-        self.backBtnClickCallback;
+    if (self.backInPortraitBtnClickCallback) {
+        self.backInPortraitBtnClickCallback;
     }
 }
 

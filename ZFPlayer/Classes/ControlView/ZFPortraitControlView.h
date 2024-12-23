@@ -68,7 +68,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy, nullable) void(^sliderValueChanged)(CGFloat value);
 
 /// 竖屏返回按钮
-@property (nonatomic, copy) void(^backBtnClickCallback)(void);
+@property (nonatomic, copy) void(^backInPortraitBtnClickCallback)(void);
 
 /// 如果是暂停状态，seek完是否播放，默认YES
 @property (nonatomic, assign) BOOL seekToPlay;
