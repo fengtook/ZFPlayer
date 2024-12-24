@@ -36,8 +36,6 @@
 @property (nonatomic, strong) UIView *bottomToolView;
 /// 顶部工具栏
 @property (nonatomic, strong) UIView *topToolView;
-/// 返回按钮
-@property (nonatomic, strong) UIImageView * backIMGView;
 /// 标题
 @property (nonatomic, strong) UILabel *titleLabel;
 /// 播放或暂停按钮
@@ -63,7 +61,9 @@
         [self addSubview:self.topToolView];
         [self addSubview:self.bottomToolView];
         [self addSubview:self.playOrPauseBtn];
-        [self.topToolView addSubview:self.backIMGView];
+        [self addSubview:self.front10Btn];
+        [self addSubview:self.back10Btn];
+        [self.topToolView addSubview:self.backButton];
         [self.topToolView addSubview:self.titleLabel];
         [self.bottomToolView addSubview:self.currentTimeLabel];
         [self.bottomToolView addSubview:self.slider];
@@ -89,7 +89,7 @@
     CGFloat min_view_w = self.bounds.size.width;
     CGFloat min_view_h = self.bounds.size.height;
     CGFloat min_margin = 9;
-
+    
     min_x = 0;
     min_y = 0;
     min_w = min_view_w;
@@ -98,11 +98,11 @@
     
     min_x = 5;
     min_y = iPhoneX ? 50 : 0;
-    min_w = 40;
-    min_h = 40;
-    self.backIMGView.frame = CGRectMake(min_x, min_y, min_w, min_h);
+    min_w = 45;
+    min_h = 45;
+    self.backButton.frame = CGRectMake(min_x, min_y, min_w, min_h);
     
-    min_x = 40;
+    min_x = 50;
     min_y = iPhoneX ? 50 : 0;
     min_w = min_view_w - min_x - 15;
     min_h = 40;
@@ -120,6 +120,18 @@
     min_h = min_w;
     self.playOrPauseBtn.frame = CGRectMake(min_x, min_y, min_w, min_h);
     self.playOrPauseBtn.center = self.center;
+    
+    
+    CGFloat front10BtnWidth = 30;
+    CGFloat front10BtnX = CGRectGetMaxX(self.playOrPauseBtn.frame) + 40;
+    CGFloat front10BtnY = self.playOrPauseBtn.zf_centerY - (front10BtnWidth / 2);
+    self.front10Btn.frame = CGRectMake(front10BtnX, front10BtnY, front10BtnWidth, front10BtnWidth);
+    
+    CGFloat back10BtnWidth = 30;
+    CGFloat back10BtnX = CGRectGetMinX(self.playOrPauseBtn.frame) - back10BtnWidth - 40;
+    CGFloat back10BtnY = self.playOrPauseBtn.zf_centerY - (back10BtnWidth / 2);
+    self.back10Btn.frame = CGRectMake(back10BtnX, back10BtnY, back10BtnWidth, back10BtnWidth);
+    
     
     min_x = min_margin;
     min_w = 62;
@@ -152,16 +164,25 @@
         self.topToolView.zf_y = -self.topToolView.zf_height;
         self.bottomToolView.zf_y = self.zf_height;
         self.playOrPauseBtn.alpha = 0;
+        self.back10Btn.alpha = 0;
+        self.front10Btn.alpha = 0;
     } else {
         self.topToolView.zf_y = 0;
         self.bottomToolView.zf_y = self.zf_height - self.bottomToolView.zf_height;
         self.playOrPauseBtn.alpha = 1;
+        self.back10Btn.alpha = 1;
+        self.front10Btn.alpha = 1;
     }
 }
 
 - (void)makeSubViewsAction {
     [self.playOrPauseBtn addTarget:self action:@selector(playPauseButtonClickAction:) forControlEvents:UIControlEventTouchUpInside];
     [self.fullScreenBtn addTarget:self action:@selector(fullScreenButtonClickAction:) forControlEvents:UIControlEventTouchUpInside];
+    [self.backButton addTarget:self action:@selector(backButtonClickAction:) forControlEvents:UIControlEventTouchUpInside];
+    
+    [self.back10Btn addTarget:self action:@selector(back10ButtonClickAction:) forControlEvents:UIControlEventTouchUpInside];
+    [self.front10Btn addTarget:self action:@selector(front10ButtonClickAction:) forControlEvents:UIControlEventTouchUpInside];
+    
 }
 
 #pragma mark - action
@@ -173,6 +194,42 @@
 - (void)fullScreenButtonClickAction:(UIButton *)sender {
     [self.player enterFullScreen:YES animated:YES];
 }
+
+
+- (void)backButtonClickAction:(UIButton *)sender {
+    if (self.backPortraitBtnClickCallback) {
+        self.backPortraitBtnClickCallback();
+    }
+}
+
+/// 后退10秒
+- (void)back10ButtonClickAction:(UIButton *)sender {
+    NSTimeInterval currentTime = self.player.currentTime;
+    NSTimeInterval newTime = currentTime - 10;
+    NSTimeInterval totalDuration = self.player.totalTime; // 获取视频总时长
+    if (newTime < 0) {
+        newTime = 0; // 如果新时间超过总时长，设置为总时长
+    }
+    [self.player seekToTime:newTime completionHandler:^(BOOL finished) {
+        // 更新 slider 的值
+        self.slider.value = newTime / totalDuration; // 更新 slider 的值
+    }];
+}
+
+/// 前进10秒
+- (void)front10ButtonClickAction:(UIButton *)sender {
+    NSTimeInterval currentTime = self.player.currentTime;
+    NSTimeInterval newTime = currentTime + 10;
+    NSTimeInterval totalDuration = self.player.totalTime; // 获取视频总时长
+    if (newTime > totalDuration) {
+        newTime = totalDuration; // 如果新时间超过总时长，设置为总时长
+    }
+    [self.player seekToTime:newTime completionHandler:^(BOOL finished) {
+        // 更新 slider 的值
+        self.slider.value = newTime / totalDuration; // 更新 slider 的值
+    }];
+}
+
 
 /// 根据当前播放状态取反
 - (void)playOrPause {
@@ -250,6 +307,8 @@
     self.bottomToolView.zf_y         = self.zf_height - self.bottomToolView.zf_height;
     self.playOrPauseBtn.alpha        = 1;
     self.player.statusBarHidden      = NO;
+    self.back10Btn.alpha = 1;
+    self.front10Btn.alpha = 1;
 }
 
 - (void)hideControlView {
@@ -260,9 +319,12 @@
     self.playOrPauseBtn.alpha        = 0;
     self.topToolView.alpha           = 0;
     self.bottomToolView.alpha        = 0;
+    self.back10Btn.alpha = 0;
+    self.front10Btn.alpha = 0;
 }
 
 - (BOOL)shouldResponseGestureWithPoint:(CGPoint)point withGestureType:(ZFPlayerGestureType)type touch:(nonnull UITouch *)touch {
+    UIView *touchedView = [self hitTest:point withEvent:nil];
     CGRect sliderRect = [self.bottomToolView convertRect:self.slider.frame toView:self];
     if (CGRectContainsPoint(sliderRect, point)) {
         return NO;
@@ -393,22 +455,34 @@
     return _fullScreenBtn;
 }
 
-- (UIImageView *)backIMGView {
-    if (!_backIMGView) {
-        _backIMGView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"返回_white"]];
-        _backIMGView.contentMode = UIViewContentModeCenter;
-        _backIMGView.userInteractionEnabled = YES;
-        __weak typeof(self) weakSelf = self;
-        UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(back:)];
-        [_backIMGView addGestureRecognizer:tap];
+- (UIButton *)backButton {
+    if (!_backButton) {
+        _backButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_backButton setImage:[UIImage imageNamed:@"返回_white"] forState:UIControlStateNormal];
     }
-    return _backIMGView;
+    return _backButton;
 }
 
-- (void)back:(UITapGestureRecognizer *)gesture {
-    if (self.backInPortraitBtnClickCallback) {
-        self.backInPortraitBtnClickCallback;
+- (UIButton *)back10Btn {
+    if (!_back10Btn) {
+        _back10Btn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_back10Btn setImage:[UIImage imageNamed:@"vide_front_10"] forState:UIControlStateNormal];
+        _back10Btn.backgroundColor = UIColor.lightGrayColor;
+        _back10Btn.layer.masksToBounds = YES;
+        _back10Btn.layer.cornerRadius = 15;
     }
+    return _back10Btn;
+}
+
+- (UIButton *)front10Btn {
+    if (!_front10Btn) {
+        _front10Btn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_front10Btn setImage:[UIImage imageNamed:@"vide_back_10"] forState:UIControlStateNormal];
+        _front10Btn.backgroundColor = UIColor.lightGrayColor;
+        _front10Btn.layer.masksToBounds = YES;
+        _front10Btn.layer.cornerRadius = 15;
+    }
+    return _front10Btn;
 }
 
 @end

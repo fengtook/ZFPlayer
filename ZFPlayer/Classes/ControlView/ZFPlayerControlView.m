@@ -243,7 +243,7 @@
 }
 
 /// 音量改变的通知
-- (void)volumeChanged:(NSNotification *)notification {    
+- (void)volumeChanged:(NSNotification *)notification {
     NSDictionary *userInfo = notification.userInfo;
     NSString *reasonstr = userInfo[@"AVSystemController_AudioVolumeChangeReasonNotificationParameter"];
     if ([reasonstr isEqualToString:@"ExplicitVolumeChange"]) {
@@ -279,7 +279,7 @@
 
 /// 设置标题、封面、全屏模式
 - (void)showTitle:(NSString *)title coverURLString:(NSString *)coverUrl fullScreenMode:(ZFFullScreenMode)fullScreenMode {
-    UIImage *placeholder = [ZFUtilities imageWithColor:[UIColor colorWithRed:220/255.0 green:220/255.0 blue:220/255.0 alpha:1] size:self.bgImgView.bounds.size];
+    UIImage *placeholder = [ZFUtilities imageWithColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:0.8] size:self.bgImgView.bounds.size];
     [self showTitle:title coverURLString:coverUrl placeholderImage:placeholder fullScreenMode:fullScreenMode];
 }
 
@@ -321,7 +321,11 @@
 /// 手势筛选，返回NO不响应该手势
 - (BOOL)gestureTriggerCondition:(ZFPlayerGestureControl *)gestureControl gestureType:(ZFPlayerGestureType)gestureType gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer touch:(nonnull UITouch *)touch {
     CGPoint point = [touch locationInView:self];
+    UIView *touchedView = [self hitTest:point withEvent:nil];
     if (self.player.isSmallFloatViewShow && !self.player.isFullScreen && gestureType != ZFPlayerGestureTypeSingleTap) {
+        return NO;
+    }
+    if (touchedView == self.portraitControlView.backButton) {
         return NO;
     }
     if (self.player.isFullScreen) {
@@ -830,6 +834,11 @@
 - (void)setBackBtnClickCallback:(void (^)(void))backBtnClickCallback {
     _backBtnClickCallback = [backBtnClickCallback copy];
     self.landScapeControlView.backBtnClickCallback = _backBtnClickCallback;
+}
+
+- (void)setBackPortraitBtnClickCallback:(void (^)(void))backPortraitBtnClickCallback {
+    _backPortraitBtnClickCallback = [backPortraitBtnClickCallback copy];
+    self.portraitControlView.backPortraitBtnClickCallback = _backPortraitBtnClickCallback;
 }
 
 @end

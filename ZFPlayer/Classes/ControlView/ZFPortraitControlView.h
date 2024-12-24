@@ -45,7 +45,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// 播放或暂停按钮
 @property (nonatomic, strong, readonly) UIButton *playOrPauseBtn;
-
+/// 返回按钮
+@property (nonatomic, strong) UIButton * backButton;
 /// 播放的当前时间
 @property (nonatomic, strong, readonly) UILabel *currentTimeLabel;
 
@@ -58,6 +59,11 @@ NS_ASSUME_NONNULL_BEGIN
 /// 全屏按钮
 @property (nonatomic, strong, readonly) UIButton *fullScreenBtn;
 
+///  前进10秒
+@property (nonatomic, strong) UIButton *front10Btn;
+///   后退10秒
+@property (nonatomic, strong) UIButton *back10Btn;
+
 /// 播放器
 @property (nonatomic, weak) ZFPlayerController *player;
 
@@ -68,7 +74,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy, nullable) void(^sliderValueChanged)(CGFloat value);
 
 /// 竖屏返回按钮
-@property (nonatomic, copy) void(^backInPortraitBtnClickCallback)(void);
+@property (nonatomic, copy) void(^backPortraitBtnClickCallback)(void);
 
 /// 如果是暂停状态，seek完是否播放，默认YES
 @property (nonatomic, assign) BOOL seekToPlay;
